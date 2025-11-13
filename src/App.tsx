@@ -1,8 +1,5 @@
-import React from 'react'
-import { Routes, Route, Link } from 'react-router-dom'
-import Home from './pages/Home'
-import Movements from './pages/Movements'
-import { AppBar, Toolbar, Typography, Container } from '@mui/material'
+import { AppBar, Container, Toolbar, Typography } from '@mui/material'
+import { Link, Outlet } from 'react-router-dom'
 
 export default function App() {
   return (
@@ -23,10 +20,7 @@ export default function App() {
         </Toolbar>
       </AppBar>
       <Container sx={{ mt: 4 }}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/movements" element={<Movements />} />
-        </Routes>
+        <Outlet />
       </Container>
     </div>
   )

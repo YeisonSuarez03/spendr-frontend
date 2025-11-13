@@ -15,6 +15,23 @@ COPY . .
 # Build the project
 RUN npm run build
 
+# Test stage
+FROM node:20-alpine as test
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy project files
+COPY . .
+
+# Run tests
+RUN npm run test -- --run
+
 # Production stage
 FROM nginx:alpine
 
