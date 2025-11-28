@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
-import { BrowserRouter, Route } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import App from './App'
 import { store } from './store'
 import './index.css'
@@ -12,10 +12,12 @@ createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-        <Route path='/' element={<App />}>
-          <Route index element={<Home />} />
-          <Route path="/movements" element={<Movements />} />
-        </Route>
+        <Routes>
+          <Route path='/' element={<App />}>
+            <Route index element={<Home />} />
+            <Route path="/movements" element={<Movements />} />
+          </Route>
+        </Routes>
         <App />
       </BrowserRouter>
     </Provider>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button, MenuItem, Grid } from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button, MenuItem, Grid, ListItemIcon, Typography } from '@mui/material'
+import { ingressOptions, egressOptions } from '../config/categories'
 import { useCreateMovementMutation } from '../services/api'
 
 type Props = {
@@ -37,13 +38,32 @@ export default function MovementDialog({ open, onClose }: Props) {
             <TextField label="Name" value={name} onChange={(e) => setName(e.target.value)} fullWidth />
           </Grid>
           <Grid item xs={12}>
-            <TextField label="Category" value={category} onChange={(e) => setCategory(e.target.value)} fullWidth />
+            <TextField
+              select
+              label="Category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              fullWidth
+              disabled={!type}
+              helperText={!type ? 'Select a type first' : undefined}
+            >
+              <MenuItem value="">All</MenuItem>
+              {(() => {
+                const opts = type === 'ingress' ? ingressOptions : type === 'egress' ? egressOptions : []
+                return opts.map((opt) => (
+                  <MenuItem key={opt.name} value={opt.name}>
+                    <ListItemIcon sx={{ minWidth: 36 }}>{opt.icon}</ListItemIcon>
+                    <Typography component="span">{opt.name}</Typography>
+                  </MenuItem>
+                ))
+              })()}
+            </TextField>
           </Grid>
           <Grid item xs={12}>
             <TextField label="Value" value={value} onChange={(e) => setValue(e.target.value === '' ? '' : Number(e.target.value))} fullWidth type="number" />
           </Grid>
           <Grid item xs={12}>
-            <TextField select label="Type" value={type} onChange={(e) => setType(e.target.value as any)} fullWidth>
+            <TextField select label="Type" value={type} onChange={(e) => { setType(e.target.value as any); setCategory(''); }} fullWidth>
               <MenuItem value="ingress">Ingress (income)</MenuItem>
               <MenuItem value="egress">Egress (expense)</MenuItem>
             </TextField>

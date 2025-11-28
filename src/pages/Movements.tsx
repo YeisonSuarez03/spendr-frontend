@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useClearAllMutation, useGetMovementsQuery } from "../services/api";
+import { useDebounce } from "../hooks/useDebounce";
 import {
   List,
   ListItem,
@@ -15,6 +16,7 @@ import {
 import { green, red } from "@mui/material/colors";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import { ingressOptions, egressOptions } from "../config/categories";
 import dayjs from "dayjs";
 
 export default function Movements() {
@@ -24,7 +26,15 @@ export default function Movements() {
     startDate: "",
     endDate: "",
   });
-  const { data: movements, isLoading } = useGetMovementsQuery(filters);
+  // Debounced filters to avoid hammering the backend on every keystroke
+  const debounceDelay = useMemo(() => {
+    const envDelay = Number(import.meta.env.VITE_FILTER_DEBOUNCE_MS);
+    return Number.isFinite(envDelay) && envDelay > 0 ? envDelay : 300;
+  }, []);
+  const debouncedFilters = useDebounce(filters, debounceDelay);
+  // Do not debounce category: always use immediate selected category in queries
+  const effectiveFilters = { ...debouncedFilters, category: filters.category };
+  const { data: movements, isLoading } = useGetMovementsQuery(effectiveFilters);
 
   const [clearAll, {isLoading:isLoadingDelete}] = useClearAllMutation();
   // In your component:
@@ -61,13 +71,28 @@ export default function Movements() {
         </Grid>
         <Grid item xs={12} md={3}>
           <TextField
+            select
             label="Category"
             value={filters.category}
             onChange={(e) =>
               setFilters((s) => ({ ...s, category: e.target.value }))
             }
             fullWidth
-          />
+            disabled={!filters.type}
+            helperText={!filters.type ? "Select a type first" : undefined}
+          >
+            {/* Common 'All' option */}
+            <MenuItem value="">All</MenuItem>
+            {(() => {
+              const opts = filters.type === "ingress" ? ingressOptions : filters.type === "egress" ? egressOptions : [];
+              return opts.map((opt) => (
+                <MenuItem key={opt.name} value={opt.name}>
+                  <ListItemIcon sx={{ minWidth: 36 }}>{opt.icon}</ListItemIcon>
+                  <Typography component="span">{opt.name}</Typography>
+                </MenuItem>
+              ));
+            })()}
+          </TextField>
         </Grid>
         <Grid item xs={12} md={3}>
           <TextField
